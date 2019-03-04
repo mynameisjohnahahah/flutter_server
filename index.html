@@ -1,0 +1,41 @@
+<html>
+<head>
+     <meta charset='UTF-8'>
+     <title>socket.io客户端</title>
+     <script src='/socket.io/socket.io.js'></script>
+</head>
+<body>
+     <button id='send'>发送消息到服务器</button>
+     <div>
+            <input type="text" placeholder="账号">
+            <input type="text" placeholder="消息">
+            <h3>服务器响应的消息：</h3>
+          <i id='msg'></i>
+     </div>
+</body>
+</html>
+<script>
+    window.onload = function () {
+        // var socket = io('/');
+        // var socket = io('http://119.29.119.87:8765');
+        var socket = io('http://119.29.119.87:8765');
+        var send = document.querySelector('#send');
+        var msg = document.querySelector('#msg');
+        socket.on('getMsg', data => {
+            console.log('服务端消息：',  data);
+            msg.innerHTML = `${data} <br/>`;
+        })
+
+        send.onclick = () => {
+            console.log('点击了发送消息！');
+            socket.emit('send', {
+                contacts: {
+                    name: document.getElementsByTagName('input')[0].value,
+                    info: {},
+                    id: '0001'
+                },
+                msg: document.getElementsByTagName('input')[1].value
+            });
+        }
+    }
+</script>
