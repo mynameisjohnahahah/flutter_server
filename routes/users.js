@@ -1,8 +1,27 @@
 const router = require('koa-router')()
 const User = require('../model/user')
 const crypto = require('crypto')
-
 router.prefix('/users')
+
+router.post('/login', async (ctx, next) => {
+  let data = ctx.request.body
+
+  let res = await User.findOne({
+    username: data.username
+  })
+  if(res == null) {
+    ctx.body = { code: -1, msg: '找不到这个用户', data: [] }
+    return
+  } 
+  const password =  crypto.createHash('md5').update(data.password + res.slat).digest('hex')
+  
+  if(password === res.password) {
+    // 登陆成功
+    
+  } else {
+    ctx.body = { code: -1, msg: '密码错误', data: [] }
+  }
+})
 
 // 创建一个用户
 router.post('/', async (ctx, next) => {
@@ -16,15 +35,8 @@ router.post('/', async (ctx, next) => {
     slat
   })
 
-  users.save((err, res) => {
-    if(err) {
-      console.log('失败:' + err)
-      ctx.body = {msg: 'success'}
-    } else {
-      ctx.body = {msg: 'success'}
-      console.log('插入成功')
-    }
-  })
+  let res = await users.save()
+  ctx.body = { code: 1, msg: 'success', data: [] }
 })
 
 // 删除一个用户
@@ -67,15 +79,20 @@ router.put('/', async (ctx, next) => {
 // 根据名字查询一个用户
 router.get('/', async (ctx, next) => {
   let name = ctx.query.name
-  let res = await User.findOne({
-    username: name
-  })
-
-  // 不能把密码返回去
-  let temp = JSON.parse(JSON.stringify(res))
-  delete temp['password']
-  delete temp['slat']
-  ctx.body = temp
+  if(name) {
+    let res = await User.findOne({
+      username: name
+    })
+  
+    // 不能把密码返回去
+    let temp = JSON.parse(JSON.stringify(res))
+    delete temp['password']
+    delete temp['slat']
+  
+    ctx.body = temp
+  } else {
+    ctx.body = 'test'
+  }
 })
 
 module.exports = router
